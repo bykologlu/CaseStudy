@@ -1,0 +1,92 @@
+﻿@model UI.AspMVC.ViewModels.Passenger.ListVM
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Kayıtlar</h2>
+            @if (TempData["Message"] != null)
+            {
+                <label class="label">@TempData["Message"].ToString()</label>
+            }
+
+            <div id="responseMessage" class="d-none my-2 py-2"></div>
+
+            @if (Model.Passengers.Count > 0)
+            {
+                <div class="card mb-4  mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-users me-1"></i>
+                        Yolcu Listesi
+                    </div>
+                    <div class="card-body">
+                        <table id="datatablesSimple">
+                            <thead>
+                                <tr>
+                                    <th>İsim Soyisim</th>
+                                    <th>Cinsiyet</th>
+                                    <th>Belge Türü</th>
+                                    <th>Belge No</th>
+                                    <th>Veriliş Tarihi</th>
+                                    <th>Güncelle</th>
+                                    <th>Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var passenger in Model.Passengers)
+                                {
+                                    <tr>
+                                        <td>@passenger.Name @passenger.Surname</td>
+                                        <td>@passenger.GenderName</td>
+                                        <td>@passenger.DocumentTypeName</td>
+                                        <td>@passenger.DocumentNo</td>
+                                        <td>@passenger.IssueDate.ToShortDateString()</td>
+                                        <td>
+                                            <a href="@Url.Action("Update","Passenger", new { id=passenger.Id, dataProvider = Model.DataProvider })" title="Güncelle" class="btn btn-primary"><i class="fa fa-edit"></i> </a>
+                                        </td>
+
+                                        <td>
+                                            @using (Ajax.BeginForm("Delete", "Passenger", new AjaxOptions { HttpMethod = "Post", OnComplete = "onCompletePostMethod" }, new { @class = "form" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                @Html.Hidden("id", passenger.Id)
+                                                @Html.Hidden("dataProvider", Model.DataProvider)
+                                                <button class="btn btn-danger"><i class="fa fa-trash"></i> </button>
+                                            }
+                                            @*<a href="@Url.Action("Update","Passenger", new { id=passenger.Id, dataProvider = Model.DataProvider })" title="Güncelle"><i class="fa fa-edit"></i></a>
+                                        <a href="@Url.Action("Delete","Passenger", new { id=passenger.Id, dataProvider = Model.DataProvider })" title="Sil"><i class="fa fa-trash"></i></a>*@
+                                        </td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+ 
+<script>
+    function onCompletePostMethod(data) {
+        $("#responseMessage").removeClass("d-none");
+        $("#responseMessage").html(data.responseJSON.Message);
+
+        if (data.responseJSON.Success) {
+            redirectURL(window.location.href);
+        }
+    }
+
+    function redirectURL(url) {
+        setTimeout(
+            function () {
+                window.location.href = url;
+            }, 1000);
+
+    }
+</script>
